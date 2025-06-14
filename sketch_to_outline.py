@@ -1,26 +1,35 @@
 import cv2
 import numpy as np
 
-# Read the input image in grayscale
-img = cv2.imread('input_sketch.png', cv2.IMREAD_GRAYSCALE)
+# 1. Load image and convert to grayscale
+img = cv2.imread('input_sketch.png')
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# Apply Gaussian blur to reduce noise
-g_blur = cv2.GaussianBlur(img, (5, 5), 0)
+# 2. Apply median blur to reduce paper texture
+blurred = cv2.medianBlur(gray, 5)
 
-# Use adaptive thresholding to binarize the image
+# 3. Apply adaptive thresholding to isolate dark lines
 thresh = cv2.adaptiveThreshold(
-    g_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 15, 10
+    blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 15, 10
 )
 
-# Morphological operations to thicken and smooth lines
-kernel = np.ones((3, 3), np.uint8)
-closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-dilated = cv2.dilate(closed, kernel, iterations=1)
+# 4. Remove small noise using contour area filtering
+contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+mask = np.zeros_like(thresh)
+min_area = 100  # Minimum area to keep
+for cnt in contours:
+    if cv2.contourArea(cnt) > min_area:
+        cv2.drawContours(mask, [cnt], -1, 255, thickness=cv2.FILLED)
 
-# Invert image so lines are black, background is white
-outline = cv2.bitwise_not(dilated)
+# 5. Apply morphological dilation and closing to thicken and join lines
+kernel = np.ones((5, 5), np.uint8)
+dilated = cv2.dilate(mask, kernel, iterations=1)
+closed = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel, iterations=2)
 
-# Save the result
-cv2.imwrite('output_outline.png', outline)
+# 6. Invert the image (white background, black lines)
+result = cv2.bitwise_not(closed)
+
+# 7. Save/export result
+cv2.imwrite('output_outline.png', result)
 
 print('Outline image saved as output_outline.png') 
