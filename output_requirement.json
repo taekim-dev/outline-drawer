@@ -11,5 +11,6 @@
   "image_size": [512, 512],
   "format": "PNG",
   "vectorizable": true,
-  "allow_noise": false
+  "allow_noise": false,
+  "interior_should_be_empty": true
 }
