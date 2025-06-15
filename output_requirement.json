@@ -1,0 +1,15 @@
+{
+  "outline_color": "#000000",
+  "background_color": "#FFFFFF",
+  "line_thickness_px": 5,
+  "anti_aliasing_allowed": false,
+  "closed_shapes_required": true,
+  "allow_filled_regions": false,
+  "min_spacing_px": 10,
+  "subject_centered": true,
+  "margin_percent": 10,
+  "image_size": [512, 512],
+  "format": "PNG",
+  "vectorizable": true,
+  "allow_noise": false
+}
